@@ -9,34 +9,6 @@ module LinkedList
       @ending.pointer = @beginning
     end
 
-    # Add data to the end of the linked list
-    # @return Node
-    def push(data)
-      if empty?
-        @beginning.pointer = Node.new(self, data, @beginning, @ending)
-        @ending.pointer = @beginning.pointer
-      else
-        previous = last
-        previous.pointer = Node.new(self, data, previous, @ending)
-        @ending.pointer = previous.pointer
-      end
-    end
-
-    alias_method :<<, :push
-
-    # Remove and return the last entry from a linked list (as original datum)
-    def pop
-      if empty?
-        nil
-      else
-        previous = last
-        more_previous = previous.back_pointer
-        more_previous.pointer = @ending
-        @ending.pointer = more_previous
-        previous.datum
-      end
-    end
-
     def each
       return enum_for(:each) unless block_given?
       unless empty?
@@ -60,16 +32,70 @@ module LinkedList
       empty? ? nil : @ending.pointer
     end
 
+    # Remove and return the last entry from a linked list (as original datum)
+    def pop
+      if empty?
+        nil
+      else
+        previous = last
+        more_previous = previous.back_pointer
+        more_previous.pointer = @ending
+        @ending.pointer = more_previous
+        previous.datum
+      end
+    end
+
+    # Add data to the end of the linked list
+    # @return Node
+    def push(data)
+      if empty?
+        @beginning.pointer = Node.new(self, data, @beginning, @ending)
+        @ending.pointer = @beginning.pointer
+      else
+        previous = last
+        previous.pointer = Node.new(self, data, previous, @ending)
+        @ending.pointer = previous.pointer
+      end
+    end
+
+    alias_method :<<, :push
+
+    def random
+      return nil if empty?
+      self[rand(size)]
+    end
+
+    def reverse
+      other = self.class.new
+      self.reverse_each do |node|
+        other.push node.datum
+      end
+      other
+    end
+
+    def rewind(node = nil)
+      if node
+        node.respond_to?(:back_pointer) ? node.back_pointer : @beginning
+      else
+        @beginning
+      end
+    end
+
     def seek(node)
       node.pointer
     end
 
-    def reverse(node)
-      node.respond_to?(:back_pointer) ? node.back_pointer : nil
-    end
-
-    def rewind
-      @beginning
+    # Remove and return the first entry from a linked list (as original datum)
+    def shift
+      if empty?
+        nil
+      else
+        previous = first
+        more_previous = previous.pointer
+        more_previous.back_pointer = @beginning
+        @beginning.pointer = more_previous
+        previous.datum
+      end
     end
 
     def size
@@ -82,17 +108,31 @@ module LinkedList
       end
     end
 
-    def [](index)
-      node = @beginning.pointer
-      index.times do
-        node = seek(node)
+    # Add data to the beginning of the linked list
+    # @return Node
+    def unshift(data)
+      if empty?
+        push data # don't reinvent this part
+      else
+        previous = first
+        previous.back_pointer = Node.new(self, data, @beginning, previous)
+        @beginning.pointer = previous.back_pointer
       end
-      node
     end
 
-    def random
-      return nil if empty?
-      self[rand(size)]
+    def [](index)
+      if index < 0
+        node = @ending.pointer
+        ((index * -1) - 1).times do
+          node = rewind(node)
+        end
+      else
+        node = @beginning.pointer
+        index.times do
+          node = seek(node)
+        end
+      end
+      node
     end
   end
 end
