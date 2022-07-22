@@ -1,4 +1,7 @@
+# frozen_string_literal: true
+
 module LinkedList
+  # Nodes are used to form the List
   class Node
     include Comparable
 

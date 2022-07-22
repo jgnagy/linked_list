@@ -1,4 +1,7 @@
+# frozen_string_literal: true
+
 module LinkedList
+  # The List is the core of the LinkedList module
   class List
     include Enumerable
 
@@ -11,12 +14,13 @@ module LinkedList
 
     def each
       return enum_for(:each) unless block_given?
-      unless empty?
-        node = @beginning
-        until node.pointer.is_a?(Sentinel)
-          node = seek(node)
-          yield node
-        end
+
+      return if empty?
+
+      node = @beginning
+      until node.pointer.is_a?(Sentinel)
+        node = seek(node)
+        yield node
       end
     end
 
@@ -58,16 +62,17 @@ module LinkedList
       end
     end
 
-    alias_method :<<, :push
+    alias << push
 
     def random
       return nil if empty?
+
       self[rand(size)]
     end
 
     def reverse
       other = self.class.new
-      self.reverse_each do |node|
+      reverse_each do |node|
         other.push node.datum
       end
       other
@@ -103,7 +108,7 @@ module LinkedList
         0
       else
         count = 0
-        each {|_n| count += 1}
+        each { |_n| count += 1 }
         count
       end
     end
@@ -121,7 +126,7 @@ module LinkedList
     end
 
     def [](index)
-      if index < 0
+      if index.negative?
         node = @ending.pointer
         ((index * -1) - 1).times do
           node = rewind(node)
